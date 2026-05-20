@@ -1,0 +1,34 @@
+# Maven / Java
+/target/
+/build/
+*.class
+*.jar
+*.war
+!/mvnw
+/.mvn/wrapper/maven-wrapper.jar
+
+# Maven IDE files
+*.iml
+/.idea/
+/.vscode/
+
+# Resources / config (do NOT commit secrets)
+/backend/src/main/resources/application.properties
+*.env
+.env.local
+secrets.*
+*.jks
+*.keystore
+
+# Frontend
+/frontend/node_modules/
+
+# Logs and temporary
+*.log
+tmp/
+*.tmp
+*.bak
+
+# OS
+.DS_Store
+Thumbs.db
