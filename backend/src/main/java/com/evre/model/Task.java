@@ -13,6 +13,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -28,6 +30,8 @@ public class Task {
     private String description;
     private String priority;
 
+    private LocalDateTime deadline;
+
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
 
@@ -38,4 +42,10 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "assigned_to_id")
     private User assignedTo;
+
+    @jakarta.persistence.OneToMany(mappedBy = "task", cascade = jakarta.persistence.CascadeType.ALL, fetch = jakarta.persistence.FetchType.EAGER)
+    private java.util.List<SubTask> subTasks;
+
+    @jakarta.persistence.OneToMany(mappedBy = "task", cascade = jakarta.persistence.CascadeType.ALL, fetch = jakarta.persistence.FetchType.EAGER)
+    private java.util.List<Comment> comments;
 }

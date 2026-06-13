@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import { taskService, projectService, logService, userService } from '../services/api';
+import { taskService, projectService, logService, userService, subTaskService, commentService } from '../services/api';
 import { authService } from '../services/authService';
 
 const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:8080/ws-evre';
@@ -9,6 +9,7 @@ const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:8080/ws-evre';
 export const useTaskStore = create((set, get) => ({
   tasks: [],
   projects: [],
+  myTasks: [],
   currentProjectId: null,
   logs: [],
   users: [],
@@ -93,6 +94,22 @@ export const useTaskStore = create((set, get) => ({
       set({ users: data });
     } catch (error) {
       console.error('Failed to fetch users:', error);
+    }
+  },
+
+  // Fetch My Tasks
+  fetchMyTasks: async () => {
+    const { user } = get();
+    if (!user) return;
+    try {
+      set({ isLoading: true });
+      const allTasks = await taskService.getTasks();
+      const myTasks = allTasks.filter(task => task.assignedToId === user.id);
+      set({ myTasks });
+    } catch (error) {
+      console.error('Failed to fetch my tasks:', error);
+    } finally {
+      set({ isLoading: false });
     }
   },
 
@@ -198,18 +215,23 @@ export const useTaskStore = create((set, get) => ({
   // Handle updates coming from WebSocket
   handleTaskUpdateFromWS: (updatedTask) => {
     set((state) => {
+      let newTasks = state.tasks;
       const exists = state.tasks.some(t => t.id === updatedTask.id);
       if (exists) {
-        // Update existing task
-        return {
-          tasks: state.tasks.map(t => t.id === updatedTask.id ? updatedTask : t)
-        };
+        newTasks = state.tasks.map(t => t.id === updatedTask.id ? updatedTask : t);
       } else {
-        // Add new task
-        return {
-          tasks: [...state.tasks, updatedTask]
-        };
+        newTasks = [...state.tasks, updatedTask];
       }
+
+      let newMyTasks = state.myTasks;
+      const existsInMyTasks = state.myTasks.some(t => t.id === updatedTask.id);
+      if (existsInMyTasks) {
+        newMyTasks = state.myTasks.map(t => t.id === updatedTask.id ? updatedTask : t);
+      } else if (state.user && updatedTask.assignedToId === state.user.id) {
+        newMyTasks = [...state.myTasks, updatedTask];
+      }
+
+      return { tasks: newTasks, myTasks: newMyTasks };
     });
   },
 
@@ -264,10 +286,56 @@ export const useTaskStore = create((set, get) => ({
       const updatedTask = await taskService.updateTask(taskId, taskData);
       set((state) => ({
         tasks: state.tasks.map((t) => (t.id === taskId ? updatedTask : t)),
+        myTasks: state.myTasks.map((t) => (t.id === taskId ? updatedTask : t)),
       }));
       return updatedTask;
     } catch (error) {
       console.error('Failed to update task:', error);
+      throw error;
+    }
+  },
+
+  addSubTask: async (taskId, title) => {
+    try {
+      const updatedTask = await subTaskService.addSubTask(taskId, { title, isCompleted: false });
+      set((state) => ({
+        tasks: state.tasks.map((t) => (t.id === taskId ? updatedTask : t)),
+        myTasks: state.myTasks.map((t) => (t.id === taskId ? updatedTask : t)),
+      }));
+      return updatedTask;
+    } catch (error) {
+      console.error('Failed to add subtask:', error);
+      throw error;
+    }
+  },
+
+  toggleSubTask: async (subTaskId, taskId) => {
+    try {
+      const updatedTask = await subTaskService.toggleSubTask(subTaskId);
+      set((state) => ({
+        tasks: state.tasks.map((t) => (t.id === taskId ? updatedTask : t)),
+        myTasks: state.myTasks.map((t) => (t.id === taskId ? updatedTask : t)),
+      }));
+      return updatedTask;
+    } catch (error) {
+      console.error('Failed to toggle subtask:', error);
+      throw error;
+    }
+  },
+
+  addComment: async (taskId, content) => {
+    const { user } = get();
+    try {
+      const updatedTask = await commentService.addComment(taskId, {
+        content,
+        authorId: user ? user.id : null
+      });
+      set((state) => ({
+        tasks: state.tasks.map((t) => (t.id === taskId ? updatedTask : t)),
+      }));
+      return updatedTask;
+    } catch (error) {
+      console.error('Failed to add comment:', error);
       throw error;
     }
   }

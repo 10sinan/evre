@@ -1,6 +1,8 @@
 package com.evre.service.impl;
 
 import com.evre.dto.TaskDto;
+import com.evre.dto.SubTaskDto;
+import com.evre.dto.CommentDto;
 import com.evre.model.Project;
 import com.evre.model.Task;
 import com.evre.model.TaskStatus;
@@ -77,6 +79,7 @@ public class TaskServiceImpl implements TaskService {
                 .title(taskDto.getTitle())
                 .description(taskDto.getDescription())
                 .priority(taskDto.getPriority() != null ? taskDto.getPriority() : "NORMAL")
+                .deadline(taskDto.getDeadline())
                 .status(taskDto.getStatus() != null ? taskDto.getStatus() : TaskStatus.TODO)
                 .project(project)
                 .assignedTo(assignedTo)
@@ -131,6 +134,9 @@ public class TaskServiceImpl implements TaskService {
         task.setTitle(taskDto.getTitle());
         task.setDescription(taskDto.getDescription());
         task.setPriority(taskDto.getPriority() != null ? taskDto.getPriority() : "NORMAL");
+        if (taskDto.getDeadline() != null) {
+            task.setDeadline(taskDto.getDeadline());
+        }
         if (taskDto.getStatus() != null) {
             task.setStatus(taskDto.getStatus());
         }
@@ -172,8 +178,25 @@ public class TaskServiceImpl implements TaskService {
                 .description(task.getDescription())
                 .status(task.getStatus())
                 .priority(task.getPriority() != null ? task.getPriority() : "NORMAL")
+                .deadline(task.getDeadline())
                 .projectId(task.getProject() != null ? task.getProject().getId() : null)
                 .assignedToId(task.getAssignedTo() != null ? task.getAssignedTo().getId() : null)
+                .subTasks(task.getSubTasks() != null ? task.getSubTasks().stream()
+                        .map(st -> SubTaskDto.builder()
+                                .id(st.getId())
+                                .title(st.getTitle())
+                                .isCompleted(st.isCompleted())
+                                .build())
+                        .collect(Collectors.toList()) : null)
+                .comments(task.getComments() != null ? task.getComments().stream()
+                        .map(c -> CommentDto.builder()
+                                .id(c.getId())
+                                .content(c.getContent())
+                                .createdAt(c.getCreatedAt())
+                                .authorId(c.getAuthor() != null ? c.getAuthor().getId() : null)
+                                .authorUsername(c.getAuthor() != null ? c.getAuthor().getUsername() : null)
+                                .build())
+                        .collect(Collectors.toList()) : null)
                 .build();
     }
 }

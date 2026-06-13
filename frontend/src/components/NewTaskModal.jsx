@@ -10,7 +10,8 @@ const NewTaskModal = ({ onClose }) => {
     description: '',
     status: 'TODO',
     priority: 'NORMAL',
-    assignedToId: ''
+    assignedToId: '',
+    deadline: ''
   });
 
   useEffect(() => {
@@ -25,7 +26,8 @@ const NewTaskModal = ({ onClose }) => {
     try {
       const payload = {
         ...formData,
-        assignedToId: formData.assignedToId === '' ? null : Number(formData.assignedToId)
+        assignedToId: formData.assignedToId === '' ? null : Number(formData.assignedToId),
+        deadline: formData.deadline || null
       };
       await createTask(payload);
       onClose();
@@ -103,18 +105,30 @@ const NewTaskModal = ({ onClose }) => {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Görevin Atanacağı Üye</label>
-            <select 
-              value={formData.assignedToId}
-              onChange={(e) => setFormData({...formData, assignedToId: e.target.value})}
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary transition-all appearance-none text-sm"
-            >
-              <option value="">Seçilmedi (Atanmamış)</option>
-              {users.map(u => (
-                <option key={u.id} value={u.id}>{u.username} ({u.email})</option>
-              ))}
-            </select>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1.5">Görevin Atanacağı Üye</label>
+              <select 
+                value={formData.assignedToId}
+                onChange={(e) => setFormData({...formData, assignedToId: e.target.value})}
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary transition-all appearance-none text-sm"
+              >
+                <option value="">Seçilmedi (Atanmamış)</option>
+                {users.map(u => (
+                  <option key={u.id} value={u.id}>{u.username} ({u.email})</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1.5">Bitiş Tarihi (Deadline)</label>
+              <input 
+                type="datetime-local"
+                value={formData.deadline}
+                onChange={(e) => setFormData({...formData, deadline: e.target.value})}
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary transition-all text-sm"
+              />
+            </div>
           </div>
 
           <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-slate-700/50">

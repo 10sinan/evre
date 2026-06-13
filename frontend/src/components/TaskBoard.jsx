@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import TaskColumn from './TaskColumn';
+import TaskCard from './TaskCard';
 import NewTaskModal from './NewTaskModal';
 import Sidebar from './Sidebar';
 import ActivityLogPanel from './ActivityLogPanel';
 import AnalyticsView from './AnalyticsView';
+import MyTasksView from './MyTasksView';
 import { useTaskStore } from '../store/useTaskStore';
 import { Plus, LayoutDashboard, Loader, Search } from 'lucide-react';
 import { useWebSocket } from '../hooks/useWebSocket';
@@ -37,6 +39,7 @@ const TaskBoard = () => {
   } = useTaskStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeTask, setActiveTask] = useState(null);
 
   // Computed selector
   const filteredTasks = getFilteredTasks();
@@ -63,8 +66,47 @@ const TaskBoard = () => {
     })
   );
 
+  const playSound = (type = 'pickup') => {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      if (type === 'pickup') {
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(400, audioCtx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.08);
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.08);
+      } else if (type === 'drop') {
+        oscillator.type = 'triangle';
+        oscillator.frequency.setValueAtTime(300, audioCtx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.1);
+      }
+    } catch (e) {
+      // Ignore audio context errors
+    }
+  };
+
+  const handleDragStart = (event) => {
+    const { active } = event;
+    setActiveTask(active.data.current?.task ?? null);
+    playSound('pickup');
+  };
+
   const handleDragEnd = (event) => {
     const { active, over } = event;
+    setActiveTask(null);
+    playSound('drop');
     
     if (!over) return;
 
@@ -77,6 +119,11 @@ const TaskBoard = () => {
     }
   };
 
+  const handleDragCancel = () => {
+    setActiveTask(null);
+    playSound('drop');
+  };
+
   const currentProjectName = projects.find(p => p.id === currentProjectId)?.name || 'Proje Seçin';
 
   return (
@@ -87,6 +134,8 @@ const TaskBoard = () => {
       {/* 2. Main Board Content */}
       {activeView === 'analytics' ? (
         <AnalyticsView />
+      ) : activeView === 'mytasks' ? (
+        <MyTasksView />
       ) : (
         <div className="flex-1 flex flex-col min-w-0 h-full transition-all duration-300">
           {/* Top Header */}
@@ -178,18 +227,20 @@ const TaskBoard = () => {
                   <span>Görevler yükleniyor...</span>
                 </motion.div>
               ) : (
-                <motion.div 
-                  key={currentProjectId}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -15 }}
-                  transition={{ duration: 0.3 }}
-                  className="flex items-stretch gap-6 h-full min-w-max"
-                >
+                  <motion.div 
+                    key={currentProjectId}
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -15 }}
+                    transition={{ duration: 0.3 }}
+                    className="flex items-stretch gap-4 md:gap-6 h-full"
+                  >
                   <DndContext 
                     sensors={sensors}
                     collisionDetection={closestCenter}
+                    onDragStart={handleDragStart}
                     onDragEnd={handleDragEnd}
+                    onDragCancel={handleDragCancel}
                   >
                     {COLUMNS.map(column => (
                       <TaskColumn 
@@ -199,6 +250,26 @@ const TaskBoard = () => {
                         tasks={filteredTasks.filter(t => t.status === column.id)}
                       />
                     ))}
+
+                    {/* ── Drag Overlay: "held in hand" floating card ── */}
+                    <DragOverlay dropAnimation={{
+                      duration: 220,
+                      easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+                    }}>
+                      {activeTask ? (
+                        <div
+                          style={{
+                            transform: 'rotate(-3deg) scale(1.07)',
+                            boxShadow: '0 32px 64px -12px rgba(0,0,0,0.65), 0 0 0 1px rgba(99,102,241,0.25)',
+                            cursor: 'grabbing',
+                            borderRadius: '0.75rem',
+                            opacity: 0.97,
+                          }}
+                        >
+                          <TaskCard task={activeTask} isOverlay />
+                        </div>
+                      ) : null}
+                    </DragOverlay>
                   </DndContext>
                 </motion.div>
               )}

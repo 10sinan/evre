@@ -21,7 +21,7 @@ const TaskColumn = ({ id, title, tasks }) => {
   };
 
   return (
-    <div className="flex flex-col h-full w-full max-w-sm rounded-2xl bg-column-bg border border-slate-700/50 shadow-lg overflow-hidden flex-shrink-0">
+    <div className="flex flex-col h-full flex-1 min-w-[280px] max-w-sm rounded-2xl bg-column-bg border border-slate-700/50 shadow-lg overflow-hidden transition-all duration-300">
       {/* Column Header */}
       <div className={`p-4 border-b border-slate-700/50 flex items-center justify-between ${columnColors[id]}`}>
         <h3 className="font-semibold text-slate-200 tracking-wide">{title}</h3>

@@ -72,6 +72,24 @@ export const projectService = {
   }
 };
 
+export const subTaskService = {
+  addSubTask: async (taskId, subTaskData) => {
+    const response = await api.post(`/tasks/${taskId}/subtasks`, subTaskData);
+    return response.data;
+  },
+  toggleSubTask: async (subTaskId) => {
+    const response = await api.put(`/subtasks/${subTaskId}/toggle`);
+    return response.data;
+  }
+};
+
+export const commentService = {
+  addComment: async (taskId, commentData) => {
+    const response = await api.post(`/tasks/${taskId}/comments`, commentData);
+    return response.data;
+  }
+};
+
 export const logService = {
   getLogsByProject: async (projectId) => {
     const response = await api.get(`/logs/project/${projectId}`);

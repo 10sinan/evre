@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTaskStore } from '../store/useTaskStore';
-import { Plus, Layout, Folder, ChevronLeft, ChevronRight, LogOut, Loader, BarChart2 } from 'lucide-react';
+import { Plus, Layout, Folder, ChevronLeft, ChevronRight, LogOut, Loader, BarChart2, CheckSquare } from 'lucide-react';
 
 const Sidebar = () => {
   const { 
@@ -86,8 +86,31 @@ const Sidebar = () => {
           </button>
         </div>
 
+        {/* Navigation: My Tasks */}
+        <div className="px-3 py-2">
+          {!isCollapsed && (
+            <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase px-3 mb-2 block">
+              Görevlerim
+            </span>
+          )}
+          <button
+            onClick={() => setActiveView('mytasks')}
+            className={`
+              flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all w-full text-left cursor-pointer
+              ${activeView === 'mytasks'
+                ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border border-transparent'
+              }
+              ${isCollapsed ? 'justify-center' : ''}
+            `}
+          >
+            <CheckSquare size={18} className={activeView === 'mytasks' ? 'text-blue-400' : 'text-slate-500'} />
+            {!isCollapsed && <span>Bana Atananlar</span>}
+          </button>
+        </div>
+
         {/* Project Lists */}
-        <div className="px-3 py-2 flex flex-col gap-1">
+        <div className="px-3 py-2 flex flex-col gap-1 border-t border-slate-800/50 pt-3 mt-1">
           {!isCollapsed && (
             <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase px-3 mb-2">
               Projeler
@@ -143,13 +166,18 @@ const Sidebar = () => {
       {user && (
         <div className="p-4 border-t border-slate-800 flex flex-col gap-3">
           <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
-            <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center font-bold text-slate-200 text-sm">
-              {user.username.charAt(0).toUpperCase()}
+            <div className="relative">
+              <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center font-bold text-slate-200 text-sm shadow-sm border border-slate-600">
+                {user.username.charAt(0).toUpperCase()}
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-[2.5px] border-slate-900 rounded-full"></div>
             </div>
             {!isCollapsed && (
               <div className="flex flex-col overflow-hidden">
                 <span className="text-xs font-semibold text-slate-200 truncate">{user.username}</span>
-                <span className="text-[9px] text-slate-500 truncate">{user.email}</span>
+                <span className="text-[9px] text-emerald-500 font-medium truncate flex items-center gap-1">
+                  Çevrimiçi
+                </span>
               </div>
             )}
           </div>
