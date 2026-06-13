@@ -4,6 +4,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Clock, Trash2, User } from 'lucide-react';
 import { useTaskStore } from '../store/useTaskStore';
 import TaskDetailsModal from './TaskDetailsModal';
+import { motion } from 'framer-motion';
 
 const TaskCard = ({ task }) => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -28,9 +29,7 @@ const TaskCard = ({ task }) => {
 
   const style = {
     transform: transform ? CSS.Translate.toString(transform) : undefined,
-    transition: isDragging ? 'none' : 'transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease',
     touchAction: 'none',
-    zIndex: isDragging ? 50 : undefined,
   };
 
   const priorityColor = task.priority === 'HIGH' ? 'bg-red-500/20 text-red-400 border-red-500/30' :
@@ -40,15 +39,27 @@ const TaskCard = ({ task }) => {
 
   return (
     <>
-      <div
+      <motion.div
         ref={setNodeRef}
         style={style}
         onClick={() => setIsDetailsOpen(true)}
+        layoutId={`card-${task.id}`}
+        layout
+        whileHover={{ 
+          scale: 1.03, 
+          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3)",
+          borderColor: "rgba(100, 116, 139, 0.8)" 
+        }}
+        whileDrag={{ 
+          scale: 1.08,
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+          zIndex: 50 
+        }}
+        transition={{ type: "spring", stiffness: 400, damping: 30 }}
         className={`
           relative group flex flex-col gap-3 p-4 rounded-xl border border-slate-700/50
-          bg-card-bg shadow-md backdrop-blur-sm transition-all duration-200
-          hover:shadow-lg hover:border-slate-600 hover:-translate-y-0.5
-          ${isDragging ? 'opacity-50 ring-2 ring-primary shadow-xl scale-105 cursor-grabbing' : 'cursor-grab'}
+          bg-card-bg shadow-md backdrop-blur-sm cursor-grab
+          ${isDragging ? 'opacity-40' : ''}
         `}
       >
         {/* Top Section */}
@@ -103,7 +114,7 @@ const TaskCard = ({ task }) => {
             <span>{new Date(task.createdAt || Date.now()).toLocaleDateString('tr-TR')}</span>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {isDetailsOpen && (
         <TaskDetailsModal 

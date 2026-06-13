@@ -86,4 +86,11 @@ export const userService = {
   }
 };
 
+export const analyticsService = {
+  getProjectAnalytics: async (projectId) => {
+    const response = await api.get(`/analytics/project/${projectId}`);
+    return response.data;
+  }
+};
+
 export default api;

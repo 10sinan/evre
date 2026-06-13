@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTaskStore } from '../store/useTaskStore';
-import { Plus, Layout, Folder, ChevronLeft, ChevronRight, LogOut, Loader } from 'lucide-react';
+import { Plus, Layout, Folder, ChevronLeft, ChevronRight, LogOut, Loader, BarChart2 } from 'lucide-react';
 
 const Sidebar = () => {
   const { 
@@ -10,7 +10,9 @@ const Sidebar = () => {
     fetchProjects, 
     createProject,
     user,
-    logout
+    logout,
+    activeView,
+    setActiveView
   } = useTaskStore();
 
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -111,6 +113,29 @@ const Sidebar = () => {
           {projects.length === 0 && !isCollapsed && (
             <span className="text-xs text-slate-600 px-3 py-2 italic">Henüz pano yok.</span>
           )}
+        </div>
+
+        {/* Navigation: Analytics */}
+        <div className="px-3 py-2">
+          {!isCollapsed && (
+            <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase px-3 mb-2 block">
+              Görünüm
+            </span>
+          )}
+          <button
+            onClick={() => setActiveView(activeView === 'analytics' ? 'board' : 'analytics')}
+            className={`
+              flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all w-full text-left cursor-pointer
+              ${activeView === 'analytics'
+                ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border border-transparent'
+              }
+              ${isCollapsed ? 'justify-center' : ''}
+            `}
+          >
+            <BarChart2 size={18} className={activeView === 'analytics' ? 'text-violet-400' : 'text-slate-500'} />
+            {!isCollapsed && <span>İstatistikler</span>}
+          </button>
         </div>
       </div>
 

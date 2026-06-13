@@ -14,8 +14,38 @@ export const useTaskStore = create((set, get) => ({
   users: [],
   isLoading: false,
   error: null,
+  activeView: 'board',
   stompClient: null,
   user: authService.getCurrentUser(),
+  
+  // Filter States
+  searchQuery: '',
+  filterAssignee: 'All',
+  filterPriority: 'All',
+
+  setSearchQuery: (query) => set({ searchQuery: query }),
+  setFilterAssignee: (assignee) => set({ filterAssignee: assignee }),
+  setFilterPriority: (priority) => set({ filterPriority: priority }),
+  setActiveView: (view) => set({ activeView: view }),
+
+  getFilteredTasks: () => {
+    const { tasks, searchQuery, filterAssignee, filterPriority } = get();
+    return tasks.filter((task) => {
+      const matchesSearch = 
+        task.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        (task.description && task.description.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      const matchesAssignee = 
+        filterAssignee === 'All' || 
+        task.assignedToId === Number(filterAssignee);
+
+      const matchesPriority = 
+        filterPriority === 'All' || 
+        task.priority === filterPriority;
+
+      return matchesSearch && matchesAssignee && matchesPriority;
+    });
+  },
 
   login: async (username, password) => {
     try {

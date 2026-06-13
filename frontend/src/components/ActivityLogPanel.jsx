@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTaskStore } from '../store/useTaskStore';
 import { Activity, Bell, ChevronRight, ChevronLeft, Clock } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const ActivityLogPanel = () => {
   const logs = useTaskStore((state) => state.logs);
@@ -41,30 +42,36 @@ const ActivityLogPanel = () => {
             <Bell size={18} className="animate-pulse" />
           </div>
         ) : (
-          <>
-            {logs.map((log) => (
-              <div 
-                key={log.id} 
-                className="p-3 bg-slate-950/40 border border-slate-800/60 rounded-xl hover:border-slate-800 transition-all flex flex-col gap-1.5 animate-in fade-in slide-in-from-top-1 duration-200"
-              >
-                <p className="text-xs text-slate-300 leading-normal font-medium">{log.message}</p>
-                <div className="flex items-center gap-1 text-[9px] text-slate-500">
-                  <Clock size={10} />
-                  <span>
-                    {log.timestamp 
-                      ? new Date(log.timestamp).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) 
-                      : 'Şimdi'
-                    }
-                  </span>
-                </div>
-              </div>
-            ))}
+          <div className="flex flex-col gap-3">
+            <AnimatePresence initial={false}>
+              {logs.map((log) => (
+                <motion.div 
+                  key={log.id} 
+                  initial={{ opacity: 0, y: -20, height: 0 }}
+                  animate={{ opacity: 1, y: 0, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                  className="p-3 bg-slate-950/40 border border-slate-800/60 rounded-xl hover:border-slate-800 transition-all flex flex-col gap-1.5 overflow-hidden"
+                >
+                  <p className="text-xs text-slate-300 leading-normal font-medium">{log.message}</p>
+                  <div className="flex items-center gap-1 text-[9px] text-slate-500">
+                    <Clock size={10} />
+                    <span>
+                      {log.timestamp 
+                        ? new Date(log.timestamp).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) 
+                        : 'Şimdi'
+                      }
+                    </span>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
             {logs.length === 0 && (
               <div className="h-full flex flex-col items-center justify-center text-center p-4">
                 <span className="text-xs text-slate-600 italic">Henüz aktivite kaydedilmedi.</span>
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </div>
