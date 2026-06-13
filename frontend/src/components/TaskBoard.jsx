@@ -8,6 +8,7 @@ import Sidebar from './Sidebar';
 import ActivityLogPanel from './ActivityLogPanel';
 import AnalyticsView from './AnalyticsView';
 import MyTasksView from './MyTasksView';
+import TerminalConsole from './TerminalConsole';
 import { useTaskStore } from '../store/useTaskStore';
 import { Plus, LayoutDashboard, Loader, Search } from 'lucide-react';
 import { useWebSocket } from '../hooks/useWebSocket';
@@ -284,6 +285,9 @@ const TaskBoard = () => {
       {isModalOpen && (
         <NewTaskModal onClose={() => setIsModalOpen(false)} />
       )}
+
+      {/* Terminal Console */}
+      <TerminalConsole />
     </div>
   );
 };

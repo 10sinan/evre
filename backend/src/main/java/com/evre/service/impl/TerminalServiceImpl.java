@@ -42,7 +42,9 @@ public class TerminalServiceImpl implements TerminalService {
 
         String mainCommand = tokens.get(0);
 
-        if ("task".equalsIgnoreCase(mainCommand)) {
+        if ("help".equalsIgnoreCase(mainCommand)) {
+            return handleHelp();
+        } else if ("task".equalsIgnoreCase(mainCommand)) {
             if (tokens.size() < 2) {
                 return "Hata: 'task' komutu için alt komut belirtmelisiniz (create, move).";
             }
@@ -66,7 +68,35 @@ public class TerminalServiceImpl implements TerminalService {
             }
         }
 
-        return "Hata: Bilinmeyen komut '" + mainCommand + "'. Mevcut komutlar: task, board";
+        return "Hata: Bilinmeyen komut '" + mainCommand + "'. Mevcut komutlar: help, task, board";
+    }
+
+    private String handleHelp() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("EVRE TERMİNAL KULLANIM KILAVUZU\n");
+        sb.append("===============================\n\n");
+        
+        sb.append("1. GÖREV OLUŞTURMA (task create)\n");
+        sb.append("   Yeni bir görev oluşturmak için kullanılır. --title parametresi zorunludur.\n");
+        sb.append("   Kullanım: task create --title \"Görev Adı\" [--priority ONCELIK]\n");
+        sb.append("   Kabul Edilen Öncelikler: LOW, NORMAL, MEDIUM, HIGH\n");
+        sb.append("   Örnekler:\n");
+        sb.append("     > task create --title \"Arayüz Tasarımı\"\n");
+        sb.append("     > task create --title \"Veritabanı Kurulumu\" --priority HIGH\n\n");
+        
+        sb.append("2. GÖREV DURUMU DEĞİŞTİRME (task move)\n");
+        sb.append("   Mevcut bir görevi başka bir sütuna (duruma) taşımak için kullanılır.\n");
+        sb.append("   Kullanım: task move --id GOREV_ID --status YENI_DURUM\n");
+        sb.append("   Kabul Edilen Durumlar: TODO, IN_PROGRESS, DONE\n");
+        sb.append("   Örnekler:\n");
+        sb.append("     > task move --id 12 --status IN_PROGRESS\n");
+        sb.append("     > task move --id 15 --status DONE\n\n");
+        
+        sb.append("3. PANO İSTATİSTİKLERİ (board stats)\n");
+        sb.append("   Aktif panodaki anlık görev dağılımını tablo şeklinde gösterir.\n");
+        sb.append("   Kullanım: board stats\n");
+        
+        return sb.toString();
     }
 
     private String handleTaskCreate(List<String> tokens, Long projectId) {

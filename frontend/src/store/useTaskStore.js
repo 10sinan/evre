@@ -18,6 +18,7 @@ export const useTaskStore = create((set, get) => ({
   activeView: 'board',
   stompClient: null,
   user: authService.getCurrentUser(),
+  isTerminalOpen: false,
   
   // Filter States
   searchQuery: '',
@@ -28,6 +29,7 @@ export const useTaskStore = create((set, get) => ({
   setFilterAssignee: (assignee) => set({ filterAssignee: assignee }),
   setFilterPriority: (priority) => set({ filterPriority: priority }),
   setActiveView: (view) => set({ activeView: view }),
+  toggleTerminal: (isOpen) => set((state) => ({ isTerminalOpen: isOpen !== undefined ? isOpen : !state.isTerminalOpen })),
 
   getFilteredTasks: () => {
     const { tasks, searchQuery, filterAssignee, filterPriority } = get();

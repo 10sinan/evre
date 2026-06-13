@@ -90,6 +90,13 @@ export const commentService = {
   }
 };
 
+export const terminalService = {
+  executeCommand: async (command, projectId) => {
+    const response = await api.post('/terminal/execute', { command, projectId });
+    return response.data;
+  }
+};
+
 export const logService = {
   getLogsByProject: async (projectId) => {
     const response = await api.get(`/logs/project/${projectId}`);
