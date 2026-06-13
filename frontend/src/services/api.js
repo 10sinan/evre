@@ -10,10 +10,27 @@ const api = axios.create({
   },
 });
 
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 export const taskService = {
   // Get all tasks
   getTasks: async () => {
     const response = await api.get('/tasks');
+    return response.data;
+  },
+
+  // Get tasks by project ID
+  getTasksByProject: async (projectId) => {
+    const response = await api.get(`/tasks/project/${projectId}`);
     return response.data;
   },
 
@@ -25,7 +42,9 @@ export const taskService = {
 
   // Update task status
   updateTaskStatus: async (taskId, status) => {
-    const response = await api.put(`/tasks/${taskId}/status`, { status });
+    const response = await api.patch(`/tasks/${taskId}/status`, null, {
+      params: { status }
+    });
     return response.data;
   },
 
@@ -38,6 +57,31 @@ export const taskService = {
   // Delete a task (optional)
   deleteTask: async (taskId) => {
     const response = await api.delete(`/tasks/${taskId}`);
+    return response.data;
+  }
+};
+
+export const projectService = {
+  getProjects: async () => {
+    const response = await api.get('/projects');
+    return response.data;
+  },
+  createProject: async (projectData) => {
+    const response = await api.post('/projects', projectData);
+    return response.data;
+  }
+};
+
+export const logService = {
+  getLogsByProject: async (projectId) => {
+    const response = await api.get(`/logs/project/${projectId}`);
+    return response.data;
+  }
+};
+
+export const userService = {
+  getUsers: async () => {
+    const response = await api.get('/users');
     return response.data;
   }
 };

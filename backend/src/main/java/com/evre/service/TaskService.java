@@ -8,6 +8,7 @@ public interface TaskService {
     TaskDto createTask(TaskDto taskDto);
     TaskDto getTaskById(Long id);
     List<TaskDto> getAllTasks();
+    List<TaskDto> getTasksByProjectId(Long projectId);
     TaskDto updateTask(Long id, TaskDto taskDto);
     void deleteTask(Long id);
     TaskDto updateTaskStatus(Long id, TaskStatus status);

@@ -50,6 +50,13 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public List<ProjectDto> getProjectsByUserId(Long userId) {
+        return projectRepository.findByOwnerId(userId).stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public ProjectDto updateProject(Long id, ProjectDto projectDto) {
         Project project = projectRepository.findById(id).orElseThrow(() -> new RuntimeException("Project not found"));
         
