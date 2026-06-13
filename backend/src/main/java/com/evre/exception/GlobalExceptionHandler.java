@@ -60,14 +60,29 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
+    // NoResourceFoundException Spring 6 ile birlikte 404 durumlarında fırlatılır
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFound(org.springframework.web.servlet.resource.NoResourceFoundException ex, HttpServletRequest req) {
+        ErrorResponse body = new ErrorResponse(
+                System.currentTimeMillis(),
+                HttpStatus.NOT_FOUND.value(),
+                "Not Found",
+                "Aradığınız kaynak bulunamadı.",
+                req.getRequestURI(),
+                null
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
     // Diğer tüm hataları yakalamak için
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAll(Exception ex, HttpServletRequest req) {
+        ex.printStackTrace(); // Hatanın ne olduğunu görebilmek için logla
         ErrorResponse body = new ErrorResponse(
                 System.currentTimeMillis(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Internal Server Error",
-                "An unexpected error occurred",
+                "An unexpected error occurred: " + ex.getMessage(),
                 req.getRequestURI(),
                 null
         );
