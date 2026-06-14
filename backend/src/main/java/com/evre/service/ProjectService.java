@@ -1,9 +1,10 @@
 package com.evre.service;
 
 import com.evre.dto.ProjectDto;
+import com.evre.model.Project;
 import java.util.List;
 
-public interface ProjectService {
+public interface ProjectService extends BaseService<Project, ProjectDto, Long> {
     ProjectDto createProject(ProjectDto projectDto);
     ProjectDto getProjectById(Long id);
     List<ProjectDto> getAllProjects();
